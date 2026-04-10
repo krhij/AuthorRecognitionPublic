@@ -68,3 +68,9 @@ if __name__ == "__main__":
     # 5. Plot the final results
     print("Generating performance graphs...")
     plot_results(train_losses, val_losses, train_accs, val_accs)
+
+    final_val_acc = val_accs[-1]
+    max_val_acc = max(val_accs)
+
+    print(f"\nFinal Validation Accuracy: {final_val_acc:.2f}%")
+    print(f"Best Validation Accuracy Achieved: {max_val_acc:.2f}%")
