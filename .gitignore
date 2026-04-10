@@ -1,0 +1,13 @@
+# Python environment
+.venv/
+__pycache__/
+
+# Datasets and Images (CRITICAL)
+author*/
+HPT_handwritten_polish_text_dataset/
+*.png
+*.jpg
+
+# OS generated files
+.DS_Store
+Thumbs.db
