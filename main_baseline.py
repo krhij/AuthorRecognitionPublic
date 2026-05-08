@@ -15,7 +15,7 @@ if __name__ == "__main__":
     print("\nStarting Training Engine...")
     train_losses, val_losses, train_accs, val_accs = train_model(
         model=model, train_loader=train_loader, val_loader=val_loader, 
-        num_epochs=20, learning_rate=0.0001, weighted_decay=1e-4
+        num_epochs=60, learning_rate=0.0001, weighted_decay=1e-4
     )
 
     print("\nTraining Complete! Saving weights...")
