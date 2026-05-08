@@ -1,7 +1,17 @@
 import torch
 import matplotlib.pyplot as plt
 
-from get_dataloader import get_dataloaders
+#to zamienic zeby miec albo z augmentacja albo bez
+#from get_dataloader import get_dataloaders
+from get_dataloader_augmentation import get_dataloaders
+
+#globalne zmienne, tez do zmiany z augmentacja
+#WEIGHTS_NAME = "author_weights.pth"
+#IMAGE_NAME = "training_results.png"
+
+WEIGHTS_NAME = "author_weights_aug.pth"
+IMAGE_NAME = "training_results_aug.png"
+
 from model import CNNModel
 from training_loop import train_model 
 
@@ -33,7 +43,7 @@ def plot_results(train_losses, val_losses, train_accs, val_accs):
     plt.grid(True)
 
     # Save the graph as a picture before showing it!
-    plt.savefig('training_results.png')
+    plt.savefig(IMAGE_NAME)
     plt.show()
 
 
@@ -53,7 +63,7 @@ if __name__ == "__main__":
         model=model, 
         train_loader=train_loader, 
         val_loader=val_loader, 
-        num_epochs=15, # Start with 15-20 epochs to see how it performs
+        num_epochs=60, # Start with 15-20 epochs to see how it performs
         learning_rate=0.0001,
         weighted_decay=1e-4
     )
@@ -62,8 +72,8 @@ if __name__ == "__main__":
     
     # 4. Save the weights (The model's "memory")
     # .pth is the standard PyTorch extension for saving weights
-    torch.save(model.state_dict(), "author_weights.pth")
-    print("Weights successfully saved to 'author_weights.pth'")
+    torch.save(model.state_dict(), WEIGHTS_NAME)
+    print("Weights successfully saved to ", WEIGHTS_NAME)
 
     # 5. Plot the final results
     print("Generating performance graphs...")
