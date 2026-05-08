@@ -91,6 +91,8 @@ def build_dataset():
                 continue
                 
             try:
+
+                word = " ".join(parts[1:-4])
                 # FIX 1: Read from the END of the list using negative indices. 
                 # This ignores spaces in the word text (e.g., "Z daleka").
                 row1, col1 = int(parts[-4]), int(parts[-3])
@@ -116,7 +118,8 @@ def build_dataset():
                 
                 # 3. Save it as a standardized PNG file
                 # The format :04d ensures filenames look like word_0001.png, word_0002.png
-                save_path = os.path.join(output_author_dir, f"word_{word_count:04d}.png")
+                clean_word = "".join(filter(str.isalnum, word)) # Usuwa znaki specjalne z nazwy słowa
+                save_path = os.path.join(output_author_dir, f"{clean_word}_{word_count:04d}.png")
                 processed_word.save(save_path)
                 
                 word_count += 1
