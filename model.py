@@ -49,11 +49,10 @@ class ResNet18_Custom(nn.Module):
     def __init__(self, num_classes=8):
         super(ResNet18_Custom, self).__init__()
         
-        # 1. Load the empty ResNet18 blueprint (weights=None means training from scratch)
+        #weights=None wiec uczenie od zera a nie transfer learning z ImageNet (bo tam 3 kanały a my mamy 1)
         self.resnet = models.resnet18(weights=None)
         
-        # 2. ADAPT THE INPUT: Change the first layer to accept Grayscale (1 channel) instead of RGB (3 channels)
-        # We copy the exact settings of the original layer, but change in_channels to 1
+        #Modyfikacja pierwszej warstwy konw tak aby przyjmowała 1 kanał zamiast 3
         self.resnet.conv1 = nn.Conv2d(
             in_channels=1, 
             out_channels=64, 
@@ -62,13 +61,8 @@ class ResNet18_Custom(nn.Module):
             padding=3, 
             bias=False
         )
-        
-        # 3. ADAPT THE OUTPUT: Change the final classification head
-        # Find out how many neurons are feeding into the final layer (usually 512 for ResNet18)
         num_features = self.resnet.fc.in_features
-        # Replace the 1000-class layer with your 8-class layer
         self.resnet.fc = nn.Linear(num_features, num_classes)
 
     def forward(self, x):
-        # Simply pass the image through the modified ResNet
         return self.resnet(x)

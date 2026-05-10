@@ -1,27 +1,50 @@
 import torch
-from torch.utils.data import DataLoader, random_split
+import os
+from torch.utils.data import DataLoader, Subset
 from torchvision.datasets import ImageFolder
 from torchvision import transforms
 
-
 def get_dataloaders(data_dir="processed_dataset", batch_size=32):
-
+    
+    #  BRAK AUGMENTACJI
     transformations = transforms.Compose([
-        transforms.Grayscale(num_output_channels=1),  # Ensure images are grayscale
+        transforms.Grayscale(num_output_channels=1), 
         transforms.ToTensor(),
         transforms.Normalize((0.5,), (0.5,))
     ])
 
+    # 2. Ładujemy cały dataset jednym obiektem ImageFolder
     full_dataset = ImageFolder(root=data_dir, transform=transformations)
 
-    train_size = int(0.7 * len(full_dataset))
-    val_size = int(0.15 * len(full_dataset))
-    test_size = len(full_dataset) - train_size - val_size
-    train_dataset, val_dataset, test_dataset = random_split(full_dataset, [train_size, val_size, test_size], generator=torch.Generator().manual_seed(42))
+    train_idx, val_idx, test_idx = [], [], []
+    all_samples = full_dataset.imgs 
+    
+    # 3. Tworzymy unikalny słownik na podstawie nazw plików
+    all_unique_words = sorted(list(set([os.path.basename(path).split('_')[0] for path, _ in all_samples])))
+    
+    torch.manual_seed(42)
+    shuffled_words = torch.randperm(len(all_unique_words))
+    
+    num_words = len(all_unique_words)
+    tr_limit = int(0.7 * num_words)
+    val_limit = int(0.85 * num_words)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    train_words = set([all_unique_words[i] for i in shuffled_words[:tr_limit]])
+    val_words = set([all_unique_words[i] for i in shuffled_words[tr_limit:val_limit]])
+
+    # 5. Przypisujemy konkretne pliki do odpowiednich indeksów
+    for idx, (path, _) in enumerate(all_samples):
+        word_name = os.path.basename(path).split('_')[0]
+        if word_name in train_words:
+            train_idx.append(idx)
+        elif word_name in val_words:
+            val_idx.append(idx)
+        else:
+            test_idx.append(idx)
+
+    train_loader = DataLoader(Subset(full_dataset, train_idx), batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(Subset(full_dataset, val_idx), batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(Subset(full_dataset, test_idx), batch_size=batch_size, shuffle=False)
 
     print(f"Training batches: {len(train_loader)}")
     print(f"Validation batches: {len(val_loader)}")
@@ -30,10 +53,8 @@ def get_dataloaders(data_dir="processed_dataset", batch_size=32):
     return train_loader, val_loader, test_loader
 
 if __name__ == "__main__":
-    # Test the loader if this script is run directly
+ 
     train_loader, val_loader, test_loader = get_dataloaders()
-    
-    # Grab one batch to verify the shape
     images, labels = next(iter(train_loader))
     print(f"\nShape of one batch of images: {images.shape}")
     print(f"Shape of one batch of labels: {labels.shape}")

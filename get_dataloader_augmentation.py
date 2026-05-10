@@ -61,4 +61,15 @@ def get_dataloaders(data_dir="processed_dataset", batch_size=32):
     val_loader = DataLoader(Subset(test_data, val_idx), batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(Subset(test_data, test_idx), batch_size=batch_size, shuffle=False)
 
+
+    print(f"Training batches: {len(train_loader)}")
+    print(f"Validation batches: {len(val_loader)}")
+    print(f"Testing batches: {len(test_loader)}")
     return train_loader, val_loader, test_loader
+
+if __name__ == "__main__":
+ 
+    train_loader, val_loader, test_loader = get_dataloaders()
+    images, labels = next(iter(train_loader))
+    print(f"\nShape of one batch of images: {images.shape}")
+    print(f"Shape of one batch of labels: {labels.shape}")

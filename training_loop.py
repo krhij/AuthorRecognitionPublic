@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from get_dataloader import get_dataloaders  # Importing your data pipeline
+from get_dataloader import get_dataloaders 
 from model import CNNModel  
 import torchmetrics
 
@@ -9,6 +9,7 @@ import torchmetrics
 
 def train_model(model, train_loader, val_loader, num_epochs=20, learning_rate=0.001, weighted_decay=1e-4):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Training on device: {device}\n")
     model.to(device)
 
     criterion = nn.CrossEntropyLoss()
