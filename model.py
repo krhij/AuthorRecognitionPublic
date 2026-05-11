@@ -38,10 +38,10 @@ class CNNModel(nn.Module):
     
     def _initialize_weights(self):
         for layer in self.modules():
-            # If it's a Conv or Linear layer, apply Kaiming Normal
+            #kaiming jesli konwolucyjna albo liniowa zeby z lepszymi wagami zaczynac (nie calkowicie losowe)
             if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.Linear):
                 nn.init.kaiming_normal_(layer.weight, mode='fan_out', nonlinearity='relu')
-                # Set starting biases to exactly zero
+                #bias na zero zeby stabilizowac uczenie
                 if layer.bias is not None:
                     nn.init.constant_(layer.bias, 0)
 

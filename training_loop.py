@@ -8,12 +8,15 @@ import torchmetrics
 
 
 def train_model(model, train_loader, val_loader, num_epochs=20, learning_rate=0.001, weighted_decay=1e-4):
+    #wybór procesora graficznego lub zwykłego
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Training on device: {device}\n")
     model.to(device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate,weight_decay= weighted_decay)
+
+    #metryki
     train_acc_metric = torchmetrics.Accuracy(task="multiclass", num_classes=8).to(device)
     val_acc_metric = torchmetrics.Accuracy(task="multiclass", num_classes=8).to(device)
 
@@ -21,21 +24,27 @@ def train_model(model, train_loader, val_loader, num_epochs=20, learning_rate=0.
     train_accuracies = []
     val_losses = []
     val_accuracies = []
+
+    #petla treningowa
     for epoch in range(num_epochs):
 
         model.train()
         epoch_loss = 0.0
         for images, labels in train_loader:
             images, labels = images.to(device), labels.to(device)
-
+            
+            #zerowanie gradientów i krok wstecznej propagacji
             optimizer.zero_grad()
             outputs = model(images)  
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
 
+            #liczenie strat i aktualizacja metryk
             epoch_loss += loss.item()
             train_acc_metric.update(outputs, labels)
+
+        #zapisywanie uśrednionych wyników epoki
         avg_epoch_loss = epoch_loss / len(train_loader)
         train_losses.append(avg_epoch_loss)
         
@@ -43,9 +52,10 @@ def train_model(model, train_loader, val_loader, num_epochs=20, learning_rate=0.
         train_acc_metric.reset()
         train_accuracies.append(train_acc)
 
-
+        #tryb ewaluacji - wyłącza dropout
         model.eval()
         epoch_val_loss = 0.0
+        #wyłączenie liczenia gradientów podczas sprawdzania
         with torch.no_grad():
             for images, labels in val_loader:
                 images, labels = images.to(device), labels.to(device)
@@ -54,6 +64,7 @@ def train_model(model, train_loader, val_loader, num_epochs=20, learning_rate=0.
                 epoch_val_loss += loss.item()
                 val_acc_metric.update(outputs, labels)
 
+            #obliczanie końcowej straty i celności na walidacji
             avg_epoch_val_loss = epoch_val_loss / len(val_loader)
             val_losses.append(avg_epoch_val_loss)
 
